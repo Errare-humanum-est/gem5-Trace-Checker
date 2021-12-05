@@ -20,20 +20,28 @@ class TraceAnalyser:
 
     def iterate_trace(self):
         cur_epoch_time_stamp = -1
-        with open(self.trace_file_path) as file:
-            for line in file:
-                time_stamp = self.regex_line(line)
+        file = open(self.trace_file_path, 'r')
+        for line in file:
+            time_stamp = self.regex_line(line)
 
-                if cur_epoch_time_stamp == -1:
-                    cur_epoch_time_stamp = time_stamp
+            if time_stamp == 0:
+                continue
 
-                if time_stamp > cur_epoch_time_stamp + self.time_out:
-                    print("EPOCH TIMESTAMP: " + str(time_stamp))
-                    cur_epoch_time_stamp = time_stamp
-                    self.check_deadlocks(time_stamp)
+            if cur_epoch_time_stamp == -1:
+                cur_epoch_time_stamp = time_stamp
+
+            if time_stamp > cur_epoch_time_stamp + self.time_out:
+                print("EPOCH TIMESTAMP: " + str(time_stamp))
+                cur_epoch_time_stamp = time_stamp
+                self.check_deadlocks(time_stamp)
 
     def regex_line(self, line: str):
-        param_list = re.findall(r'(\d+)\s+(\d+)\s+(\w+)\s+\w+\s+(\w*)>(\w*)\s+\[[\d\w]+,\s*line\s+([\d\w]+)\]', line)[0]
+        param_list = re.findall(r'(\d+)\s+(\d+)\s+(\w+)\s+\w+\s+(\w*)>(\w*)\s+\[[\d\w]+,\s*line\s+([\d\w]+)\]', line)
+        if not param_list:
+            return 0
+
+        param_list = param_list[0]
+
         # Check if the machine is in the mach_cluster dict
         if param_list[2] in self.mach_cluster:
             self.mach_cluster[param_list[2]].register_cache_block(param_list[2],
