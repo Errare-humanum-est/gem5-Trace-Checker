@@ -35,6 +35,9 @@ class TraceAnalyser:
                 cur_epoch_time_stamp = time_stamp
                 self.check_deadlocks(time_stamp)
 
+            if time_stamp < cur_epoch_time_stamp:
+                break
+
     def regex_line(self, line: str):
         param_list = re.findall(r'(\d+)\s+(\d+)\s+(\w+)\s+\w+\s+(\w*)>(\w*)\s+\[[\d\w]+,\s*line\s+([\d\w]+)\]', line)
         if not param_list:
